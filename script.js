@@ -5,26 +5,32 @@ let photosArray = []
 let ready = false
 let imagesLoaded = 0
 let totalImages = 0
+let initialLoad = true
 
 const imageContainer = document.getElementById('image-container')
 const loader = document.getElementById('loader')
 
 // Unsplash API
+let initialCount = 5
+let count = 10
 const apiKey = 'v3WRuLj-TEmp5R2bFpg7zyIEZHEulL53CNC3AOMNy_w'
-const count = 10
 
-const apiUrl = `https://api.unsplash.com/photos/random/?client_id=${apiKey}&count=${count}`
+let apiUrl = `https://api.unsplash.com/photos/random/?client_id=${apiKey}&count=${initialCount}`
+
+function updateAPIURLWithNewCount(picCount) {
+  apiUrl = `https://api.unsplash.com/photos/random/?client_id=${apiKey}&count=${picCount}`
+}
 
 // Check if all images were loaded
 // vvv called for each individual image
 function imageLoaded() {
-  console.log('image loaded')
+  // console.log('image loaded')
   imagesLoaded++
   console.log('imagesLoaded', imagesLoaded)
   if (imagesLoaded === totalImages) {
     ready = true
     loader.hidden = true
-    console.log('ready =', ready)
+    // count = 30
   }
 }
 
@@ -39,7 +45,6 @@ function setAttributes(element, attributes) {
 function displayPhotos() {
   imagesLoaded = 0
   totalImages = photosArray.length
-  console.log('total images:', totalImages)
   // Run function for each object in photosArray
   photosArray.forEach((photo) => {
     // Create <a> to Unsplash
@@ -73,8 +78,11 @@ async function getPhotos() {
   try {
     const response = await fetch(apiUrl)
     photosArray = await response.json()
-    // console.log(photosArray)
     displayPhotos()
+    if (initialLoad) {
+      updateAPIURLWithNewCount(count)
+      isInitialLoad = false
+    }
   } catch (error) {
     console.log(error)
   }
@@ -83,8 +91,8 @@ async function getPhotos() {
 // Check to see if scrolling near the bottom of the page, load more photos
 window.addEventListener('scroll', () => {
   if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000 && ready) {
-    // console.log('load more')
     ready = false
+    count = 30
     getPhotos()
 
     /*// constant
